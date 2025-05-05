@@ -14,4 +14,8 @@ router.get('/tailor/:id', authenticate, orderController.getTailorOrderById);
 router.get('/:id', authenticate, orderController.getOrderById);
 router.put('/update/:id', authenticate, orderController.updateOrderStatus);
 
+// OrderService: Add this route
+router.get('/status/:orderId', orderController.getOrderStatus);
+  
+
 module.exports = router;

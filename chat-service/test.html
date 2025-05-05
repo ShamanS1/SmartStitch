@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Test</title>
+</head>
+<body>
+  <h2>Chat Test</h2>
+  <input id="userId" placeholder="Your User ID">
+  <input id="orderId" placeholder="Order ID">
+  <input id="toId" placeholder="Recipient User ID">
+  <input id="msg" placeholder="Message">
+  <button onclick="joinRoom()">Join</button>
+  <button onclick="sendMessage()">Send</button>
+  <ul id="messages"></ul>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:8003');
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    function joinRoom() {
+      const userId = document.getElementById("userId").value;
+      const orderId = document.getElementById("orderId").value;
+      console.log("Joining room with:", { orderId, userId });
+      socket.emit("joinOrderRoom", { orderId, userId });
+    }
+
+    socket.on("joinedRoom", (msg) => {
+      console.log("Joined room:", msg);
+    });
+
+    socket.on("message", (data) => {
+      console.log("Received message:", data);
+      const li = document.createElement("li");
+      li.innerText = `${data.from}: ${data.message}`;
+      document.getElementById("messages").appendChild(li);
+    });
+
+    socket.on("error", (err) => {
+      console.error("Socket error:", err);
+      alert("Socket error: " + err);
+    });
+
+    function sendMessage() {
+      const from = document.getElementById("userId").value;
+      const orderId = document.getElementById("orderId").value;
+      const to = document.getElementById("toId").value;
+      const message = document.getElementById("msg").value;
+      console.log("Sending message:", { orderId, from, to, message });
+      socket.emit("sendMessage", { orderId, from, to, message });
+    }
+  </script>
+</body>
+</html>

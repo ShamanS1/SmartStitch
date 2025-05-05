@@ -120,3 +120,9 @@ exports.getTailorOrderById = async (req, res) => {
     res.status(500).json({ message: 'Error fetching order', error: error.message });
   }
 };
+
+exports.getOrderStatus =async (req, res) => {
+  const order = await Order.findById(req.params.orderId);
+  if (!order) return res.status(404).json({ message: 'Order not found' });
+  res.status(200).json({ orderStatus: order.orderStatus });
+};
