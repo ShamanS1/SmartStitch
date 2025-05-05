@@ -26,6 +26,6 @@ connectDB();
 
 // Set up server port
 app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+  console.log(`Tailor Dashboard running on port ${process.env.PORT}`);
 });
 

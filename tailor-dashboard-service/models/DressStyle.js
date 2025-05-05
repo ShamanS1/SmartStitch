@@ -11,6 +11,12 @@ const DressStyleSchema = new mongoose.Schema({
   description: { type: String },
   price: { type: Number, required: true },
   image: { type: String },  // URL of the dress style image
+  rating: {
+    type: Number,
+    default: 0,  // Default to 0 if no reviews
+    min: 0,
+    max: 5, // Rating range between 0 and 5
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

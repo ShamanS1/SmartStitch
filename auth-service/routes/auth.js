@@ -21,4 +21,21 @@ router.put('/update-profile/:id', authController.updateProfile);
 
 // Get tailor profile   
 router.get('/tailor/:id', authController.getTailorProfile);
+
+// Get customer profile
+router.put('/update-customer-profile/:id', authController.updateCustomerProfile);
+router.get('/customer-profile/:id', authController.getCustomerProfile);
+
+
+//Measurements
+router.post('/measurement/:id', authController.addMeasurementProfile);
+router.put('/measurement/:id/:profileId', authController.updateMeasurementProfile);
+router.delete('/measurement/:id/:profileId', authController.deleteMeasurementProfile);
+router.get('/measurement/:id', authController.getMeasurementProfiles);
+
+//rating
+router.patch('/update-rating/:id', authController.updateTailorRating);
+
+
+
 module.exports = router;

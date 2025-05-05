@@ -14,5 +14,8 @@ router.post('/add-dress-style/:id', authenticate, tailorController.addDressStyle
 router.put('/update-dress-style/:id', authenticate, tailorController.updateDressStyle);
 router.delete('/delete-dress-style/:id', authenticate, tailorController.deleteDressStyle);
 router.get('/dress-styles/:tailorId', authenticate, tailorController.getTailorDressStyles);
+router.get('/dress-style/:id',authenticate, tailorController.getDressStyleById);
+//rating
+router.patch('/dress-style/update-rating/:id', tailorController.updateDressRating);
 
 module.exports = router;

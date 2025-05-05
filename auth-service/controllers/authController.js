@@ -238,3 +238,231 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
+// Update Customer Profile in Auth DB
+exports.updateCustomerProfile = async (req, res) => {
+    const userId = req.params.id;
+    const { name, email, profileImage, address, measurementProfiles } = req.body;
+  
+    try {
+      const user = await User.findById(userId);
+      if (!user || user.role !== 'customer') {
+        return res.status(403).json({ message: 'Access denied or user not found' });
+      }
+  
+      // Basic user info
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (profileImage) user.profileImage = profileImage;
+  
+      // Address update (nested inside customerProfile)
+      if (address) {
+        if (!user.customerProfile) user.customerProfile = {};
+        user.customerProfile.address = address;
+      }
+
+      // MeasurementProfiles update (array, nested inside customerProfile)
+      if (measurementProfiles) {
+        if (!user.customerProfile) user.customerProfile = {};
+        user.customerProfile.measurementProfiles = measurementProfiles;
+      }
+  
+      await user.save();
+  
+      res.status(200).json({
+        message: 'Customer profile updated successfully',
+        data: user
+      });
+    } catch (error) {
+      console.error('Error updating customer profile:', error);
+      res.status(500).json({ message: 'Error updating customer profile', error });
+    }
+  };
+  
+  // Get Full Customer Profile
+exports.getCustomerProfile = async (req, res) => {
+    const userId = req.params.id;
+  
+    try {
+      const user = await User.findById(userId).select('-password');
+      if (!user || user.role !== 'customer') {
+        return res.status(404).json({ message: 'Customer not found' });
+      }
+  
+      res.status(200).json({
+        message: 'Customer profile fetched successfully',
+        data: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          profileImage: user.profileImage,
+          address: user.customerProfile?.address || null,
+          measurementProfiles: user.customerProfile?.measurementProfiles || []
+        }
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Error fetching customer profile', error: err });
+    }
+  };
+  
+
+  //Customer Measurements
+
+  // Add a new measurement profile
+exports.addMeasurementProfile = async (req, res) => {
+    const userId = req.params.id;
+    const { title, type, measurements } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || user.role !== 'customer') {
+            return res.status(403).json({ message: 'User not found or not a customer' });
+        }
+
+        // Ensure customerProfile and measurementProfiles array exist
+        if (!user.customerProfile) user.customerProfile = {};
+        if (!user.customerProfile.measurementProfiles) user.customerProfile.measurementProfiles = [];
+
+        if (user.customerProfile.measurementProfiles.length >= 12) {
+            return res.status(400).json({ message: 'Cannot add more than 12 measurement profiles' });
+        }
+
+        const newProfile = {
+            title,
+            type,
+            measurements: typeof measurements === 'object' ? measurements : {}
+
+        };
+
+        user.customerProfile.measurementProfiles.push(newProfile);
+        await user.save();
+
+        res.status(200).json({
+            message: 'Measurement profile added successfully',
+            data: user.customerProfile.measurementProfiles
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error adding measurement profile', error: err });
+    }
+};
+
+// Update a specific measurement profile
+exports.updateMeasurementProfile = async (req, res) => {
+    const userId = req.params.id;
+    const profileId = req.params.profileId;
+    const { title, type, measurements } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user || user.role !== 'customer') {
+            return res.status(403).json({ message: 'User not found or not a customer' });
+        }
+
+        // Ensure customerProfile and measurementProfiles array exist
+        if (!user.customerProfile) user.customerProfile = {};
+        if (!user.customerProfile.measurementProfiles) user.customerProfile.measurementProfiles = [];
+
+        const profile = user.customerProfile.measurementProfiles.id(profileId);
+        if (!profile) {
+            return res.status(404).json({ message: 'Measurement profile not found' });
+        }
+
+        if (title) profile.title = title;
+        if (type) profile.type = type;
+        if (measurements) profile.measurements = measurements;
+        
+          
+
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Measurement profile updated successfully',
+            data: profile
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating measurement profile', error: err });
+    }
+};
+
+
+// DELETE a measurement profile
+exports.deleteMeasurementProfile = async (req, res) => {
+  const userId = req.params.id;
+  const profileId = req.params.profileId;
+
+  try {
+    // Step 1: Find the user
+    const user = await User.findById(userId);
+    if (!user || user.role !== 'customer') {
+      return res.status(403).json({ message: 'User not found or not a customer' });
+    }
+
+    // Step 2: Check for customerProfile and measurementProfiles
+    if (!user.customerProfile || !user.customerProfile.measurementProfiles) {
+      return res.status(404).json({ message: 'Customer profile or measurement profiles not found' });
+    }
+
+    // Step 3: Find the index of the measurement profile
+    const index = user.customerProfile.measurementProfiles.findIndex(
+      (profile) => profile._id && profile._id.toString() === profileId
+    );
+    if (index === -1) {
+      return res.status(404).json({ message: 'Measurement profile not found' });
+    }
+
+    // Step 4: Remove the measurement profile using splice
+    user.customerProfile.measurementProfiles.splice(index, 1);
+
+    // Step 5: Save the updated user
+    await user.save();
+
+    return res.status(200).json({ message: 'Measurement profile deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting measurement profile:', err);
+    return res.status(500).json({ message: 'Error deleting measurement profile', error: err.message });
+  }
+};
+
+  
+  // Get all measurement profiles
+  exports.getMeasurementProfiles = async (req, res) => {
+    const userId = req.params.id;
+  
+    try {
+      const user = await User.findById(userId);
+      if (!user || user.role !== 'customer') {
+        return res.status(403).json({ message: 'User not found or not a customer' });
+      }
+  
+      res.status(200).json({
+        message: 'Measurement profiles fetched successfully',
+        data: user.customerProfile?.measurementProfiles || []
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Error fetching measurement profiles', error: err });
+    }
+  };
+  
+
+// PATCH /user/update-rating/:id
+exports.updateTailorRating = async (req, res) => {
+    const tailorId = req.params.id;
+    const { rating } = req.body;
+  
+    try {
+      const user = await User.findById(tailorId);
+      if (!user || user.role !== 'tailor') {
+        return res.status(404).json({ message: 'Tailor not found' });
+      }
+  
+      user.shopDetails.ratings = rating; // Assuming tailor ratings are stored in shopDetails
+      await user.save();
+  
+      res.status(200).json({ message: 'Tailor rating updated', rating });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to update tailor rating', error: err.message });
+    }
+  };
+  
+
+  

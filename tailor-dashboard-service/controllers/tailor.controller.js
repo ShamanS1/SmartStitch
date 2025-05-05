@@ -144,3 +144,38 @@ exports.getTailorDressStyles = async (req, res) => {
     res.status(500).json({ message: 'Error fetching dress styles', error });
   }
 };
+
+// Get Dress Style by Dress ID
+exports.getDressStyleById = async (req, res) => {
+  const dressId = req.params.id;
+  try {
+    const dressStyle = await DressStyle.findById(dressId);
+    if (!dressStyle) {
+      return res.status(404).json({ message: 'Dress style not found' });
+    }
+    res.status(200).json(dressStyle);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching dress style', error });
+  }
+};
+
+
+// PATCH /dress-style/update-rating/:id
+exports.updateDressRating = async (req, res) => {
+  const dressStyleId = req.params.id;
+  const { rating } = req.body;
+
+  try {
+    const dress = await DressStyle.findById(dressStyleId);
+    if (!dress) {
+      return res.status(404).json({ message: 'Dress style not found' });
+    }
+
+    dress.rating = rating;
+    await dress.save();
+
+    res.status(200).json({ message: 'Dress style rating updated', rating });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update dress style rating', error: err.message });
+  }
+};

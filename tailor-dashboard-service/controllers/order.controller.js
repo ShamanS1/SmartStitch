@@ -1,4 +1,3 @@
-// const Order = require('../models/Order');  // Assume an Order model exists
 
 // // ✅ Get All Orders for Tailor
 // exports.getOrdersForTailor = async (req, res) => {
