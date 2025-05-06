@@ -14,4 +14,13 @@ start "Tailor Dashboard Service" cmd /k "cd /d %~dp0tailor-dashboard-service && 
 REM Run Review Service
 start "Review Service" cmd /k "cd /d %~dp0review-service && npm start"
 
+REM Run Notification Service
+start "Notification Service" cmd /k "cd /d %~dp0NotificationService && npm start"
+
+REM Run Chat Service
+start "Chat Service" cmd /k "cd /d %~dp0chat-service && npm start"
+
+REM Run API Gateway
+start "API Gateway" cmd /k "cd /d %~dp0api-gateway && npm start"
+
 echo All backend services are starting in separate windows.

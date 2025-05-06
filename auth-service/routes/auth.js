@@ -36,6 +36,8 @@ router.get('/measurement/:id', authController.getMeasurementProfiles);
 //rating
 router.patch('/update-rating/:id', authController.updateTailorRating);
 
+// Get user by ID (generic)
+router.get('/user/:id', authController.getUserById);
 
 
 module.exports = router;
